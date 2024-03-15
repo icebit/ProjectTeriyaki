@@ -66,14 +66,24 @@ public class BasicEnemyScript : MonoBehaviour
     }
 
     private void SearchWalkPoint()
-    {   
+    {
+        Vector3 newPoint;
+
         // calculate random z and x points in range to walk to
         float randomZ = Random.Range(-walkPointRange, walkPointRange);
         float randomX = Random.Range(-walkPointRange, walkPointRange);
 
         // set the walk point to this new generated point
         // takes enemy's current position and adds the new points to find a target location
-        walkPoint = new Vector3(transform.position.x + randomX, transform.position.y, transform.position.z + randomZ);
+        newPoint = new Vector3(transform.position.x + randomX, transform.position.y, transform.position.z + randomZ);
+
+        //check if the new point is within the bounds of the navmesh
+        NavMeshHit hit;
+        if (NavMesh.SamplePosition(newPoint, out hit, 1.0f, 1))
+        {
+            walkPoint = newPoint;
+        }
+
 
         // check that the new walk point is actually on the ground
         if (Physics.Raycast(walkPoint, -transform.up, 2f, whatIsGround)) walkPointSet = true;
