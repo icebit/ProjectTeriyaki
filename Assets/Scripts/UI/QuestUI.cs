@@ -9,6 +9,7 @@ public class QuestUI : MonoBehaviour
 {
     [SerializeField] TextMeshProUGUI m_QuestText;
     [SerializeField] Transform m_QuestPanel;
+    [SerializeField] GameObject m_ContinueText;
 
     public float panelTweenTime = 1f;
 
@@ -28,6 +29,7 @@ public class QuestUI : MonoBehaviour
 
     void Start()
     {
+        m_ContinueText.SetActive(false);
     }
 
     public void WriteText(string textToWrite) {
@@ -40,6 +42,8 @@ public class QuestUI : MonoBehaviour
 
     private IEnumerator UpdateWriting(float waitTime)
     {
+        m_ContinueText.SetActive(false);
+
         while (substringAmount < currentText.Length)
         {
             substringAmount += writingCharacterIncrement;
@@ -48,6 +52,8 @@ public class QuestUI : MonoBehaviour
 
             yield return new WaitForSeconds(waitTime);
         }
+
+        m_ContinueText.SetActive(true);
     }
 
     // Tween the box up onto the screen
