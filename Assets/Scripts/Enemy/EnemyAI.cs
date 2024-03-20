@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Animations;
 using UnityEngine.AI;
 
 // source: https://www.youtube.com/watch?v=UjkSFoLxesw
@@ -28,12 +29,15 @@ public class EnemyAI : MonoBehaviour
     public float sightRange, attackRange;
     private bool playerInSightRange, playerInAttackRange;
 
+    public Animator animator;
+
     private void Awake()
     {
         // find the location of the player at load
         player = GameObject.Find("Player").transform;
 
         agent = GetComponent<NavMeshAgent>();
+        animator = GetComponent<Animator>();
     }
 
     private void Update()
@@ -44,6 +48,8 @@ public class EnemyAI : MonoBehaviour
 
         if (!playerInSightRange && !playerInAttackRange) Patrolling();
         if (playerInSightRange && !playerInAttackRange) ChasePlayer();
+
+        animator.SetBool("moving", agent.isStopped);
         //if (playerInSightRange && playerInAttackRange) AttackPLayer();
     }
 
@@ -94,6 +100,7 @@ public class EnemyAI : MonoBehaviour
         // set the enemy to head towards the player's current position
         agent.SetDestination(player.position);
         Debug.Log("chasing player!!!!");
+
     }
 }
 
