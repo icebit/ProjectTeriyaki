@@ -9,6 +9,9 @@ public class PlayerIdleState : PlayerBaseState
     public override void EnterState()
     {
         _ctx.Animator.SetBool(_ctx.IsWalkingHash, false);
+        _ctx.Animator.SetBool(_ctx.IsRunningHash, false);
+        _ctx.CurrentMovementX = 0;
+        _ctx.CurrentMovementZ = 0;
     }
 
     public override void UpdateState()

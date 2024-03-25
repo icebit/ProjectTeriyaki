@@ -8,11 +8,14 @@ public class PlayerRunState : PlayerBaseState
        : base(currentContext, playerStateFactory) { }
     public override void EnterState()
     {
-
+        _ctx.Animator.SetBool(_ctx.IsWalkingHash, true);
+        _ctx.Animator.SetBool(_ctx.IsRunningHash, true);
     }
 
     public override void UpdateState()
     {
+        _ctx.CurrentMovementX = _ctx.CurrentMovementInput.x * _ctx.MovementSpeed * _ctx.RunMultiplier;
+        _ctx.CurrentMovementZ = _ctx.CurrentMovementInput.y * _ctx.MovementSpeed * _ctx.RunMultiplier;
         CheckSwitchStates();
     }
 

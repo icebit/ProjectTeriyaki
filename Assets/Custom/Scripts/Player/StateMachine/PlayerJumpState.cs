@@ -8,17 +8,19 @@ public class PlayerJumpState : PlayerBaseState
     : base(currentContext, playerStateFactory)
     {
         InitializeSubState();
+        _isRootState = true;
     }
     public override void EnterState()
     {
         HandleJump();
         _ctx.RequireNewJumpPress = true;
+        _ctx.Animator.SetBool(_ctx.IsJumpingHash, true);
     }
 
     public override void UpdateState()
     {
+        HandleGravity();  
         CheckSwitchStates();
-        HandleGravity();
     }
 
     public override void ExitState()

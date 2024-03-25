@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 // context file: script responsible for handling player input and switching to the appropriate player state
-// TODO: keep following this https://youtu.be/kV06GiJgFhc?si=XO6J8nTtnmjVC2e5 tutorial and finish this movement and camera junk (27:05)
 
 public class PlayerStateMachine : MonoBehaviour
 {
@@ -22,11 +21,13 @@ public class PlayerStateMachine : MonoBehaviour
     Vector2 _currentMovementInput;
     // variable used to apply to the player's transform
     Vector3 _currentMovement;
+    Vector3 _cameraRelativeMovement;
     // boolean to store whether movement is detected from player input
     bool _isMovementPressed;
     bool _isRunPressed;
     bool _isJumpPressed;
     bool _requireNewJumpPress = false;
+    bool _requireNewAttack = false;
     // controls the strength of character rotation when moving
     float _rotationFactorPerFrame = 10.0f;
     // factor to increase movement by when running
@@ -53,12 +54,18 @@ public class PlayerStateMachine : MonoBehaviour
     public int IsRunningHash { get { return _isRunningHash; } }
     public int IsJumpingHash { get { return _isJumpingHash; } }
     public bool IsJumping { set { _isJumping = value; } }
+    public Vector2 CurrentMovementInput { get { return _currentMovementInput; } }
+    public float CurrentMovementX { get { return _currentMovement.x; } set { _currentMovement.x = value; } }
     public float CurrentMovementY { get { return _currentMovement.y; } set { _currentMovement.y = value; } }
+    public float CurrentMovementZ { get { return _currentMovement.z; } set { _currentMovement.z = value; } }
     public float InitialJumpVelocity { get { return _initialJumpVelocity; } }
     public CharacterController CharacterController { get { return _characterController; } }
     public float GroundedGravity { get { return _groundedGravity; } }
     public float Gravity { get { return _gravity; } }
     public bool RequireNewJumpPress { get { return _requireNewJumpPress; } set { _requireNewJumpPress = value; } }
+    public bool RequireNewAttack { get { return _requireNewAttack; } set { _requireNewAttack = value; } }
+    public float RunMultiplier { get { return _runMultiplier; } }
+    public float MovementSpeed { get { return _movementSpeed; } }
 
     private void Awake()
     {
@@ -86,15 +93,16 @@ public class PlayerStateMachine : MonoBehaviour
         _playerInput.PlayerControls.Run.canceled += onRun;
         _playerInput.PlayerControls.Jump.started += onJump;
         _playerInput.PlayerControls.Jump.canceled += onJump;
+        _currentMovement.y = _groundedGravity;
     }
     void HandleRotation()
     {
         // the x and z vector for the player to face
         Vector3 positionToLookAt;
 
-        positionToLookAt.x = _currentMovement.x;
+        positionToLookAt.x = _cameraRelativeMovement.x;
         positionToLookAt.y = 0.0f;
-        positionToLookAt.z = _currentMovement.z;
+        positionToLookAt.z = _cameraRelativeMovement.z;
 
         // the current rotation of the player
         Quaternion currentRotation = transform.rotation;
@@ -131,9 +139,10 @@ public class PlayerStateMachine : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        HandleRotation();
-        _currentState.UpdateState();
-        _characterController.Move(_currentMovement * Time.deltaTime);
+      HandleRotation();
+      _currentState.UpdateStates();
+      _cameraRelativeMovement = ConvertToCameraSpace(_currentMovement);
+      _characterController.Move(_cameraRelativeMovement * Time.deltaTime);
     }
 
     void onMovementInput(InputAction.CallbackContext context)
@@ -145,6 +154,25 @@ public class PlayerStateMachine : MonoBehaviour
         _currentMovement.z = _currentMovementInput.y * _movementSpeed;
         // if player input x or y does not equal 0 (negative or positive), movement pressed is true
         _isMovementPressed = _currentMovementInput.x != 0 || _currentMovementInput.y != 0;
+    }
+
+    Vector3 ConvertToCameraSpace(Vector3 vectorToRotate)
+    {
+        Vector3 cameraForward = Camera.main.transform.forward;
+        Vector3 cameraRight = Camera.main.transform.right;
+
+        cameraForward.y = 0;
+        cameraRight.y = 0;
+
+        cameraForward = cameraForward.normalized;
+        cameraRight = cameraRight.normalized;
+
+        Vector3 cameraFZproduct = vectorToRotate.z * cameraForward;
+        Vector3 cameraRXproduct = vectorToRotate.x * cameraRight;
+
+        Vector3 vectorCameraSpace = cameraFZproduct + cameraRXproduct;
+        vectorCameraSpace.y = vectorToRotate.y;
+        return vectorCameraSpace;
     }
 
     void onRun(InputAction.CallbackContext context)

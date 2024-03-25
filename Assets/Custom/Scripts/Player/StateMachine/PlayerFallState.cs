@@ -2,15 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerGroundedState : PlayerBaseState
+public class PlayerFallState : PlayerBaseState
 {
-    // constructor
-    public PlayerGroundedState(PlayerStateMachine currentContext, PlayerStateFactory playerStateFactory)
+    public PlayerFallState (PlayerStateMachine currentContext, PlayerStateFactory playerStateFactory)
     : base (currentContext, playerStateFactory)
     {
-        InitializeSubState();
         _isRootState = true;
+        InitializeSubState();
     }
+
     public override void EnterState()
     {
 
@@ -19,11 +19,20 @@ public class PlayerGroundedState : PlayerBaseState
     public override void UpdateState()
     {
         CheckSwitchStates();
+        HandleGravity();
     }
 
     public override void ExitState()
     {
 
+    }
+
+    public override void CheckSwitchStates()
+    {
+        if (!_ctx.IsMovementPressed && !_ctx.IsRunPressed)
+        {
+            SwitchState(_factory.Grounded());
+        }
     }
 
     public override void InitializeSubState()
@@ -45,16 +54,8 @@ public class PlayerGroundedState : PlayerBaseState
         }
     }
 
-    public override void CheckSwitchStates()
+    void HandleGravity()
     {
-        if (_ctx.IsJumpPressed && !_ctx.RequireNewJumpPress)
-        {
-            SwitchState(_factory.Jump());
-        }
-
-        else if (!_ctx.CharacterController.isGrounded)
-        {
-            SwitchState(_factory.Fall());
-        }
+        _ctx.CurrentMovementY += _ctx.Gravity * Time.deltaTime;
     }
 }

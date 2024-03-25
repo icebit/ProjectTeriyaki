@@ -3,6 +3,7 @@
 
 public abstract class PlayerBaseState
 {
+    protected bool _isRootState = false;
     protected PlayerStateMachine _ctx;
     protected PlayerStateFactory _factory;
     protected PlayerBaseState _currentSubState;
@@ -22,9 +23,13 @@ public abstract class PlayerBaseState
 
     public abstract void InitializeSubState();
 
-    void UpdateStates()
+    public void UpdateStates()
     {
-
+        UpdateState();
+        if (_currentSubState != null)
+        {
+            _currentSubState.UpdateStates();
+        }
     }
 
     protected void SwitchState(PlayerBaseState newState)
@@ -35,8 +40,16 @@ public abstract class PlayerBaseState
         // new state enters state
         newState.EnterState();
 
-        // switch current state of context
-        _ctx.CurrentState = newState;
+        if (_isRootState)
+        {
+            // switch current state of context
+            _ctx.CurrentState = newState;
+        }
+        else if (_currentSuperState != null)
+        {
+            // set the current super state's sub state to the new state
+            _currentSuperState.SetSubState(newState);
+        }
     }
 
     protected void SetSuperState( PlayerBaseState newSuperState)
