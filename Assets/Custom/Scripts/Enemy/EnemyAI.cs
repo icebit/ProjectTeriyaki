@@ -92,14 +92,14 @@ public class EnemyAI : MonoBehaviour
 
         // check that the new walk point is actually on the ground
         if (Physics.Raycast(walkPoint, -transform.up, 2f, whatIsGround)) walkPointSet = true;
-        Debug.Log("Current enemy walkpoint: " + walkPoint);
+        //Debug.Log("Current enemy walkpoint: " + walkPoint);
     }
 
     private void ChasePlayer()
     {  
         // set the enemy to head towards the player's current position
         agent.SetDestination(player.position);
-        Debug.Log("chasing player!!!!");
+        //Debug.Log("chasing player!!!!");
 
     }
 }
