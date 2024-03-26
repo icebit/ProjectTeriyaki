@@ -10,7 +10,7 @@ public class PlayerAttackState : PlayerBaseState
     {
 
     }
-     
+
     public override void UpdateState()
     {
 
@@ -35,3 +35,4 @@ public class PlayerAttackState : PlayerBaseState
     {
 
     }
+}
