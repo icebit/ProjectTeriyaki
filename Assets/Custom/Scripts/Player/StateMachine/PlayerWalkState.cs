@@ -39,5 +39,9 @@ public class PlayerWalkState : PlayerBaseState
         {
             SwitchState(_factory.Idle());
         }
+        else if (_ctx.IsAttackPressed)
+        {
+            SwitchState(_factory.Attack());
+        }
     }
 }

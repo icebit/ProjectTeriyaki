@@ -57,7 +57,7 @@ public class PlayerJumpState : PlayerBaseState
 
     void HandleJump()
     {
-        _ctx.IsJumping = true;
+        //_ctx.IsJumping = true;
         _ctx.CurrentMovementY = _ctx.InitialJumpVelocity;
     }
 

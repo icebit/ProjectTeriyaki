@@ -16,26 +16,34 @@ public class PlayerStateMachine : MonoBehaviour
     int _isWalkingHash;
     int _isRunningHash;
     int _isJumpingHash;
+    int _onAttackHash;
 
     // variable to store the Vector2 produced by the player input
     Vector2 _currentMovementInput;
     // variable used to apply to the player's transform
     Vector3 _currentMovement;
+    // variable to store movement vector converted relative to camera position
     Vector3 _cameraRelativeMovement;
-    // boolean to store whether movement is detected from player input
+
+    // booleans to store whether movement is detected from player input
     bool _isMovementPressed;
     bool _isRunPressed;
     bool _isJumpPressed;
+    bool _isAttackPressed;
+
+    // logic booleans to prevent state repetition
     bool _requireNewJumpPress = false;
     bool _requireNewAttack = false;
+
     // controls the strength of character rotation when moving
     float _rotationFactorPerFrame = 10.0f;
-    // factor to increase movement by when running
+    // movement variables
     float _runMultiplier = 3.0f;
     float _movementSpeed = 1.5f;
-
-    bool _isJumping = false;
     float _initialJumpVelocity = 5.0f;
+
+    bool _isAttacking = false;
+    bool _attackLanded = false;
 
     float _groundedGravity = -.05f;
     float _gravity = -9.8f;
@@ -49,11 +57,14 @@ public class PlayerStateMachine : MonoBehaviour
     public bool IsMovementPressed { get { return _isMovementPressed; } }
     public bool IsRunPressed { get { return _isRunPressed; } }
     public bool IsJumpPressed { get { return _isJumpPressed; } }
+    public bool IsAttackPressed { get { return _isAttackPressed; } }
     public Animator Animator { get { return _animator; } }
     public int IsWalkingHash { get { return _isWalkingHash; } }
     public int IsRunningHash { get { return _isRunningHash; } }
     public int IsJumpingHash { get { return _isJumpingHash; } }
-    public bool IsJumping { set { _isJumping = value; } }
+    public int OnAttackHash { get { return _onAttackHash; } }
+    public bool IsAttacking { get { return _isAttacking; } set { _isAttacking = value; } }
+    public bool AttackLanded { get { return _attackLanded; } set { _attackLanded = value; } }
     public Vector2 CurrentMovementInput { get { return _currentMovementInput; } }
     public float CurrentMovementX { get { return _currentMovement.x; } set { _currentMovement.x = value; } }
     public float CurrentMovementY { get { return _currentMovement.y; } set { _currentMovement.y = value; } }
@@ -83,6 +94,7 @@ public class PlayerStateMachine : MonoBehaviour
         _isWalkingHash = Animator.StringToHash("isWalking");
         _isRunningHash = Animator.StringToHash("isRunning");
         _isJumpingHash = Animator.StringToHash("isJumping");
+        _onAttackHash = Animator.StringToHash("onAttack");
 
         // expression to listen when the player input triggers the "Move" action,
         // and pass the context to the onMovementInput function
@@ -93,6 +105,8 @@ public class PlayerStateMachine : MonoBehaviour
         _playerInput.PlayerControls.Run.canceled += onRun;
         _playerInput.PlayerControls.Jump.started += onJump;
         _playerInput.PlayerControls.Jump.canceled += onJump;
+        _playerInput.PlayerControls.Attack.started += onAttack;
+        _playerInput.PlayerControls.Attack.canceled += onAttack;
         _currentMovement.y = _groundedGravity;
     }
     void HandleRotation()
@@ -107,7 +121,7 @@ public class PlayerStateMachine : MonoBehaviour
         // the current rotation of the player
         Quaternion currentRotation = transform.rotation;
 
-        if (_isMovementPressed)
+        if (_isMovementPressed && !_isAttacking)
         {
             // new quaternion based on where the player is currently pressing
             Quaternion targetRotation = Quaternion.LookRotation(positionToLookAt);
@@ -116,45 +130,23 @@ public class PlayerStateMachine : MonoBehaviour
         }
     }
 
-    void HandleJump()
-    {
-        if (!_isJumping && _characterController.isGrounded && _isJumpPressed)
-        {
-            _animator.SetBool(_isJumpingHash, true);
-            _isJumping = true;
-            _currentMovement.y = _initialJumpVelocity;
-        }
-        else if (!_isJumpPressed && _isJumping && _characterController.isGrounded)
-        {
-            _isJumping = false;
-        }
-    }
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
     // Update is called once per frame
     void Update()
     {
-      HandleRotation();
-      _currentState.UpdateStates();
-      _cameraRelativeMovement = ConvertToCameraSpace(_currentMovement);
-      _characterController.Move(_cameraRelativeMovement * Time.deltaTime);
+        HandleRotation();
+        _currentState.UpdateStates();
+        _cameraRelativeMovement = ConvertToCameraSpace(_currentMovement);
+        _characterController.Move(_cameraRelativeMovement * Time.deltaTime);
     }
 
     void onMovementInput(InputAction.CallbackContext context)
     {
         // read the Vector2 from player input
         _currentMovementInput = context.ReadValue<Vector2>();
-        // translate player input into player transform movement
-        _currentMovement.x = _currentMovementInput.x * _movementSpeed;
-        _currentMovement.z = _currentMovementInput.y * _movementSpeed;
         // if player input x or y does not equal 0 (negative or positive), movement pressed is true
         _isMovementPressed = _currentMovementInput.x != 0 || _currentMovementInput.y != 0;
     }
+
 
     Vector3 ConvertToCameraSpace(Vector3 vectorToRotate)
     {
@@ -184,6 +176,12 @@ public class PlayerStateMachine : MonoBehaviour
     {
         _isJumpPressed = context.ReadValueAsButton();
         _requireNewJumpPress = false;
+    }
+
+    void onAttack(InputAction.CallbackContext context)
+    {
+        _isAttackPressed = context.ReadValueAsButton();
+        _requireNewAttack = false;
     }
 
     private void OnEnable()
