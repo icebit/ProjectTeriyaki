@@ -20,7 +20,7 @@ public class GameManager : MonoBehaviour
         
         yield return new WaitForSeconds(1.0f);
 
-        questUI.WriteText("Hello! This is a demo of the quest UI system.");
+        questUI.WriteText("OBJECTIVE: kill all of the cylinders (evil)");
 
         yield return new WaitForSeconds(5.0f);
 

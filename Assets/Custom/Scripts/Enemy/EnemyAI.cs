@@ -6,6 +6,10 @@ using UnityEngine.AI;
 
 // source: https://www.youtube.com/watch?v=UjkSFoLxesw
 
+// note: if this project were more fleshed out, i would redo this into a class
+// hierarchy system so that different enemy AI's could inherit basic components,
+// however there's only one type of enemy so its no big deal lol
+
 public class EnemyAI : MonoBehaviour
 {
     // pathfinding component for the enemy
@@ -20,6 +24,8 @@ public class EnemyAI : MonoBehaviour
     public Vector3 walkPoint;
     bool walkPointSet;
     public float walkPointRange;
+    [SerializeField] float giveUpTime = 8.0f;
+    float patrolTime;
 
     // attacking (currently unused)
     public float timeBetweenAttacks;
@@ -58,8 +64,16 @@ public class EnemyAI : MonoBehaviour
         // if no walk point is set, calls function to generate a new one
         if (!walkPointSet) SearchWalkPoint();
 
-        // set destination of the enemy to the current walk point
-        if (walkPointSet) 
+        // if enemy hasnt made it to the point in time, find new point
+        if (Time.time > patrolTime + giveUpTime)
+        {
+            //Debug.Log("i give up");
+            GetComponent<Rigidbody>().velocity = Vector3.zero;
+            SearchWalkPoint();
+        }
+
+            // set destination of the enemy to the current walk point
+            if (walkPointSet) 
             agent.SetDestination(walkPoint);
 
         // calculate the distance to the target walk point
@@ -73,6 +87,9 @@ public class EnemyAI : MonoBehaviour
     private void SearchWalkPoint()
     {
         Vector3 newPoint;
+
+        // reset patrolTime timer
+        patrolTime = Time.time;
 
         // calculate random z and x points in range to walk to
         float randomZ = Random.Range(-walkPointRange, walkPointRange);

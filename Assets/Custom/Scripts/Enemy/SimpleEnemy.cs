@@ -4,14 +4,20 @@ using UnityEngine;
 
 public class SimpleEnemy : MonoBehaviour
 {
-    public float health = 30;
-    public float maxHealth = 30;
+    public float health;
+    public float maxHealth;
 
-    private EnemyHealthBar healthBar;
+    public float attackSpeed = 3.0f;
+    float nextAttack = 0;
+    public int strength;
+
+    EnemyHealthBar healthBar;
+    PlayerInfo playerInfo;
 
     private void Awake()
     {
         healthBar = GetComponentInChildren<EnemyHealthBar>();
+        playerInfo = GameObject.FindWithTag("Player").GetComponent<PlayerInfo>();
     }
 
     // Update is called once per frame
@@ -19,5 +25,17 @@ public class SimpleEnemy : MonoBehaviour
     {
         // temporary debug method call
         healthBar.UpdateHealthBar(health, maxHealth);
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (Time.time > nextAttack && collision.gameObject.CompareTag("Player"))
+        {
+            nextAttack = Time.time + attackSpeed;
+
+            playerInfo.playerHealth -= strength;
+        }
+
+
     }
 }
