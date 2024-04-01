@@ -100,6 +100,17 @@
                 },
                 {
                     "name": "",
+                    "id": "00fe1960-1fb4-4543-88f8-7028b36b801a",
+                    "path": "<XRController>{LeftHand}/joystick",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "2d6b653d-6f56-44fe-8ccb-e43c826c5c46",
                     "path": "<Keyboard>/leftShift",
                     "interactions": "",
