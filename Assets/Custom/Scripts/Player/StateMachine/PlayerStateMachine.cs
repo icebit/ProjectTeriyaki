@@ -2,11 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using SojaExiles;
 
 // context file: script responsible for handling player input and switching to the appropriate player state
 
 public class PlayerStateMachine : MonoBehaviour
 {
+
     // reference variables
     PlayerInput _playerInput;
     CharacterController _characterController;
@@ -182,6 +184,7 @@ public class PlayerStateMachine : MonoBehaviour
     {
         _isAttackPressed = context.ReadValueAsButton();
         _requireNewAttack = false;
+
     }
 
     private void OnEnable()

@@ -11,6 +11,9 @@ public class GameManager : MonoBehaviour
     {
         questUI.OpenBox();
 
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
         StartCoroutine(QuestDemo());
     }
 
